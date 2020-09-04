@@ -1,21 +1,20 @@
 var express = require('express')
 var app = express()
 const axios = require('axios')
-const { response } = require('express')
 
 app.use(express.json())
 
 app.get('/callback', (req, res)=>{
-    function1 = () => {
+    const function1 = () => {
         console.log('This is function 1')
     }
 
-    function3 = () => {
+    const function3 = () => {
         console.log("This is function 3")
     }
 
-    function2 = (callback) => {
-        console.log('This is function 2');
+    const function2 = (callback) => {
+        console.log('This is function 2')
         callback()
     }
 
@@ -25,22 +24,24 @@ app.get('/callback', (req, res)=>{
 
 
 app.get('/promise/:id', (req, res)=>{
-    var id = req.params.id
-    const albums = (id) => axios.get('https://jsonplaceholder.typicode.com/users/'+id+'/albums')
-    const posts  = (id) => axios.get('https://jsonplaceholder.typicode.com/users/'+id+'/posts')
+    let id = req.params.id
+    const albums = (id) => axios.get('https://jsonplaceholder.typicode.com/users/'+id+'/albums').then((response)=>response.data)
+    const posts  = (id) => axios.get('https://jsonplaceholder.typicode.com/users/'+id+'/posts').then((response)=>response.data)
     
-    const getAlbums = albums(id).then(res => res.data).catch(error => error)
-    const getPosts  = posts(id).then(res => res.data).catch(error => error)
+    const getAlbums = albums(id)
+    const getPosts  = posts(id)
     Promise.all([getAlbums,getPosts]).then((values)=>{
         console.log(values)
-        res.json(values)
+        res.send(values)
+    }).catch(error => {
+        console.log(error)
+        res.send(error)
     })
 })
 
-app.get('/async-await/:id', (req, res)=>{
-    var id = req.params.id
+app.get('/async-await/:id', async (req, res)=>{
+    const id = req.params.id
 
-    getAlbums = async (id) =>{
         try{
             let response = await axios.get('https://jsonplaceholder.typicode.com/users/'+id+'/albums')
             response = await response.data
@@ -50,8 +51,7 @@ app.get('/async-await/:id', (req, res)=>{
             console.log(error)
             res.json(error)
         }
-    }
-    getAlbums(id)
+    
 })
 
 
